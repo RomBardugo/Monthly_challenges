@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import HttpResponse, HttpResponseNotFound, HttpResponseRedirect
+from django.http import Http404, HttpResponseNotFound, HttpResponseRedirect
 from django.urls import reverse
 
 monthly_challenges = {
@@ -14,7 +14,7 @@ monthly_challenges = {
     "september": 'september - Mission',
     "october": 'october - Mission',
     "november": 'november - Mission',
-    "december": 'december - Mission'
+    "december": None #'december - Mission'
 }
 
 # Create your views here.
@@ -23,20 +23,19 @@ monthly_challenges = {
 def challenges_menu(request):
     list_items = ""
     months = list(monthly_challenges.keys())
-    print(months)
-    for month in months:
-        redirect_path = reverse("month-challenge", args=[month])
-        print(redirect_path)
-        list_items += f'<li><a href="{redirect_path}">{month}</a></li>'
-    total_html = f"<ul>{list_items}</ul>"
-    return HttpResponse(total_html)
+    return render(request, "challenges/index.html",{
+        "months": months
+    })
 
 def monthly_challenge(request, month):
     if month in monthly_challenges.keys():
-        response_data = f"<h1>{monthly_challenges[month]}</h1>"
-        return HttpResponse(response_data)
+        return render(request, "challenges/challenge.html", {
+            "text": monthly_challenges[month],
+            "month": month,
+            "monthTitle": month
+        })
     else:
-        return HttpResponseNotFound("<h1>This month is not supported!</h1>")
+        raise Http404()
 
 def monthly_challenge_by_number(request, month):
     months = list(monthly_challenges.keys())
